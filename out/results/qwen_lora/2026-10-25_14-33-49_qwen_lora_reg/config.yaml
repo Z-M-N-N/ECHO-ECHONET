@@ -1,0 +1,53 @@
+seed: 42
+csv: /home/mzhao/Datasets/EchoNet-Dynamic/FileList.csv
+video_root: /home/mzhao/Datasets/EchoNet-Dynamic/Videos
+video_ext: .mp4
+tasks:
+- EF
+- ESV
+- EDV
+encoder:
+  model_path: /mnt/disk5/mzhao/公共大模型/Qwen2.5-VL-3B
+  vision_tower_only: true
+  num_frames: 16
+  image_size: 224
+  pooling: mean
+  dtype: bfloat16
+  attn_implementation: sdpa
+  num_workers: 8
+lora:
+  r: 8
+  alpha: 16
+  dropout: 0.05
+  target_modules:
+  - attn.qkv
+  - attn.proj
+  layers: null
+head:
+  hidden_dims:
+  - 512
+  - 256
+  dropout: 0.2
+  activation: gelu
+  input_norm: true
+train:
+  batch_size: 4
+  grad_accum: 2
+  eval_batch_size: 16
+  epochs: 8
+  lr_lora: 0.0001
+  lr_head: 0.0003
+  weight_decay: 0.0001
+  loss: mse
+  huber_delta: 1.0
+  init_head: /home/mzhao/ECHO-ECHONET/out/results/qwen_linear_probe/2026-10-25_14-04-49_qwen_linear_probe_reg/mlp_head.pt
+  patience: 3
+  min_delta: 0.0001
+  grad_clip: 1.0
+  gradient_checkpointing: false
+  min_lr_ratio: 0.05
+  log_every: 20
+output:
+  root: /home/mzhao/ECHO-ECHONET/out
+  run_name: qwen_lora_reg
+num_tasks: 3
